@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="다시, 아침">
+<meta name="theme-color" content="#ebe7f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1b27" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<title>다시, 아침</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#ece8f3; --bg2:#e3e9f1; --ink:#3a3848; --soft:#77748a; --faint:#a8a5b8;
+  --card:rgba(255,255,255,.52); --cardline:rgba(255,255,255,.7); --line:rgba(90,80,130,.12);
+  --panel:#f4f1f8; --accent:#8b80b9; --accent-soft:rgba(139,127,185,.15);
+  --mist1:#d9cdee; --mist2:#f3d9e3; --mist3:#cfe0ee; --danger:#ad6b78; --ok:#6f9a8a;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg1:#1c1b27; --bg2:#202434; --ink:#e8e5f1; --soft:#a5a2b8; --faint:#6e6b82;
+    --card:rgba(255,255,255,.055); --cardline:rgba(255,255,255,.08); --line:rgba(255,255,255,.08);
+    --panel:#24232f; --accent:#b4a9e2; --accent-soft:rgba(180,169,226,.14);
+    --mist1:#3b3460; --mist2:#4a2f45; --mist3:#24405a; --danger:#d48e9b; --ok:#8fc0ad;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100vh;color:var(--ink);
+  font-family:'Nanum Myeongjo',serif;
+  background:linear-gradient(170deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;
+  overscroll-behavior-y:none;
+}
+body.lock{overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+input{font-size:16px}
+.mist{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.mist i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.75}
+.mist i:nth-child(1){width:70vw;height:70vw;background:var(--mist1);top:-18vw;left:-20vw}
+.mist i:nth-child(2){width:60vw;height:60vw;background:var(--mist2);top:30vh;right:-25vw}
+.mist i:nth-child(3){width:75vw;height:75vw;background:var(--mist3);bottom:-30vw;left:-10vw}
+
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top) + 22px) 18px calc(env(safe-area-inset-bottom) + 110px)}
+header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.brand{font-weight:800;font-size:22px;letter-spacing:.02em}
+.today{font-size:13px;color:var(--soft);margin-top:6px}
+.hbtns{display:flex;gap:6px}
+.icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--soft);background:var(--card);border:1px solid var(--cardline)}
+.icon svg{width:19px;height:19px}
+
+.next{padding:22px 22px 20px;border-radius:24px;background:var(--card);border:1px solid var(--cardline);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:14px}
+.next .k{font-size:12px;color:var(--soft);letter-spacing:.08em}
+.next .v{font-size:19px;margin-top:10px}
+.next .v b{font-size:34px;font-weight:400;letter-spacing:.02em;margin-left:4px}
+.next .v.soft{color:var(--faint);font-size:16px}
+.next .s{font-size:13px;color:var(--soft);margin-top:6px}
+
+.banner{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-radius:16px;
+  background:var(--accent-soft);font-size:13.5px;margin-bottom:14px}
+.banner button{flex:none;padding:8px 13px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;font-weight:700}
+
+#list{display:flex;flex-direction:column;gap:10px}
+.card{display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:20px;background:var(--card);
+  border:1px solid var(--cardline);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:opacity .2s}
+.card .main{flex:1;min-width:0}
+.card .time{font-size:34px;letter-spacing:.02em;line-height:1.1}
+.card .sub{font-size:14px;margin-top:6px}
+.card .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.card .tag{font-size:11.5px;padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.card .meta{font-size:12.5px;color:var(--soft);margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card.dim .time,.card.dim .sub{color:var(--faint)}
+.sw{position:relative;width:50px;height:30px;flex:none}
+.sw input{position:absolute;opacity:0;inset:0;margin:0;z-index:2}
+.sw span{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:.2s}
+.sw span::after{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:.2s}
+.sw input:checked+span{background:var(--accent)}
+.sw input:checked+span::after{transform:translateX(20px)}
+.sw input:disabled+span{opacity:.4}
+
+.empty{text-align:center;color:var(--faint);padding:48px 10px;font-size:14.5px;line-height:1.9}
+.sync{text-align:center;font-size:12px;color:var(--faint);margin-top:22px}
+.sync.warn{color:var(--danger)}
+.sync button{text-decoration:underline;color:inherit;font-size:12px}
+
+.fab{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 24px);
+  width:60px;height:60px;border-radius:50%;background:var(--accent);color:#fff;font-size:30px;line-height:1;
+  box-shadow:0 8px 24px rgba(110,95,170,.35);display:grid;place-items:center}
+
+/* sheets */
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(30,26,48,.22);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  opacity:0;pointer-events:none;transition:opacity .22s}
+.sheet.open{opacity:1;pointer-events:auto}
+.panel{width:100%;max-width:560px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);
+  border-radius:24px 24px 0 0;padding:0 20px calc(env(safe-area-inset-bottom) + 26px);transform:translateY(24px);transition:transform .25s}
+.sheet.open .panel{transform:none}
+.shead{position:sticky;top:0;z-index:2;background:var(--panel);display:flex;justify-content:space-between;align-items:center;padding:18px 0 14px}
+.shead b{font-size:16px}
+.txt{font-size:15px;color:var(--soft);min-width:44px}
+.txt.strong{color:var(--accent);font-weight:700;text-align:right}
+
+.bigtime{display:block;width:100%;text-align:center;font-size:46px!important;border:0;background:transparent;padding:8px 0 14px;
+  -webkit-appearance:none;appearance:none;font-family:'Nanum Myeongjo',serif;color:var(--ink)}
+.seg{display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:14px;background:var(--line);margin-bottom:18px}
+.seg button{padding:10px;border-radius:11px;font-size:14.5px;color:var(--soft)}
+.seg button.on{background:var(--panel);color:var(--ink);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.field{display:block;margin-bottom:18px}
+.field>span,.flabel{display:block;font-size:13px;color:var(--soft);margin-bottom:8px}
+.field input[type=text],.field input[type=url],.field input[type=date],.row input{
+  width:100%;min-height:46px;border:1px solid var(--line);background:var(--card);border-radius:13px;padding:10px 13px;
+  -webkit-appearance:none;appearance:none;font-family:inherit}
+.row{display:flex;gap:8px;align-items:center}
+.row input{flex:1;min-width:0}
+.row button,.mini{flex:none;padding:11px 14px;border-radius:12px;background:var(--line);font-size:13.5px}
+.hint{font-size:12.5px;color:var(--faint);margin:7px 0 0;line-height:1.6}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px}
+.days button{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);font-size:14.5px;color:var(--soft)}
+.days button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.quick button{padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:12.5px;color:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 11px;border-radius:999px;background:var(--accent-soft);font-size:13px}
+.chip button{width:22px;height:22px;border-radius:50%;font-size:15px;line-height:1;color:var(--soft)}
+.box{padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:18px}
+.box .flabel{margin-bottom:10px}
+.danger{display:block;width:100%;margin-top:8px;padding:14px;border-radius:14px;color:var(--danger);background:var(--line);font-size:14.5px}
+.primary{display:block;width:100%;padding:14px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:14.5px}
+.ghost{display:block;width:100%;padding:12px;border-radius:13px;border:1px solid var(--line);font-size:13.5px;color:var(--soft);margin-top:8px}
+
+/* week */
+.wrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 2px;border-bottom:1px solid var(--line)}
+.wrow .d{font-size:14px}
+.wrow .d small{color:var(--accent);margin-left:6px;font-size:12px}
+.wrow .t{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
+.wrow .t span{font-size:13.5px;padding:3px 9px;border-radius:999px;background:var(--accent-soft)}
+.wrow .t em{font-style:normal;color:var(--faint);font-size:13px}
+
+/* settings */
+.set{margin-bottom:28px}
+.set h3{font-size:16px;margin:6px 0 12px}
+.set p,.set li{font-size:13.5px;line-height:1.75;color:var(--ink)}
+.set ol{padding-left:20px;margin:0 0 12px}
+.set ol ol{padding-left:16px;margin:4px 0}
+.set li{margin-bottom:6px}
+.set b{font-weight:800}
+.set code,.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--line);padding:2px 6px;border-radius:6px;word-break:break-all}
+.code{display:block;white-space:pre;overflow-x:auto;padding:12px;margin:8px 0;line-height:1.5}
+.copyrow{display:flex;gap:8px;align-items:center;margin:8px 0 12px}
+.copyrow code{flex:1;min-width:0;padding:10px;display:block}
+.copyrow button{flex:none;padding:10px 13px;border-radius:11px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:700}
+.msg{font-size:13px;margin-top:9px;min-height:1em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--danger)}
+
+/* confirm + toast */
+.modal{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(30,26,48,.3);opacity:0;pointer-events:none;transition:opacity .18s;padding:24px}
+.modal.open{opacity:1;pointer-events:auto}
+.modal .m{width:100%;max-width:320px;background:var(--panel);border-radius:20px;padding:22px 20px 16px;text-align:center}
+.modal p{margin:0 0 18px;font-size:15px;line-height:1.6}
+.modal .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal .btns button{padding:12px;border-radius:12px;background:var(--line);font-size:14.5px}
+.modal .btns .yes{background:var(--danger);color:#fff;font-weight:700}
+.toast{position:fixed;z-index:50;left:50%;bottom:calc(env(safe-area-inset-bottom) + 100px);transform:translate(-50%,10px);
+  background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:.22s;white-space:nowrap}
+.toast.show{opacity:.92;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="mist"><i></i><i></i><i></i></div>
+
+<main>
+  <header>
+    <div>
+      <div class="brand">다시, 아침</div>
+      <div class="today" id="today"></div>
+    </div>
+    <div class="hbtns">
+      <button class="icon" id="btnWeek" aria-label="2주 미리보기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      </button>
+      <button class="icon" id="btnSet" aria-label="설정">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="next" id="next"></section>
+  <div class="banner" id="banner" hidden><span>오늘 울릴 알람이 바뀌었어요</span><button id="bannerBtn">아이폰에 반영</button></div>
+  <section id="list"></section>
+  <div class="empty" id="empty">아직 알람이 없어요.<br>아래 + 를 눌러 첫 알람을 만들어보세요.</div>
+  <div class="sync" id="sync"></div>
+</main>
+
+<button class="fab" id="fab" aria-label="알람 추가">+</button>
+
+<!-- edit -->
+<div class="sheet" id="editSheet">
+  <div class="panel">
+    <div class="shead"><button class="txt" data-close>취소</button><b id="editTitle">새 알람</b><button class="txt strong" id="saveBtn">저장</button></div>
+    <input type="time" id="fTime" class="bigtime">
+    <div class="seg" id="fType"><button data-type="once">특정 날짜</button><button data-type="repeat">반복</button></div>
+
+    <div id="onceBox">
+      <label class="field"><span>울릴 날짜</span><input type="date" id="fDate"></label>
+    </div>
+
+    <div id="repBox">
+      <span class="flabel">반복할 요일</span>
+      <div class="days" id="fDays"></div>
+      <div class="quick">
+        <button data-preset="all">매일</button><button data-preset="week">평일</button><button data-preset="end">주말</button>
+      </div>
+
+      <div class="box">
+        <span class="flabel">잠시 쉬었다가 다시 울리기</span>
+        <div class="row"><input type="date" id="fResume"><button id="clrResume">지우기</button></div>
+        <div class="quick" style="margin:10px 0 0">
+          <button data-rest="3">3일 쉬기</button><button data-rest="7">1주 쉬기</button><button data-rest="14">2주 쉬기</button>
+        </div>
+        <p class="hint" id="resumeHint"></p>
+      </div>
+
+      <div class="box">
+        <span class="flabel">이날만 건너뛰기</span>
+        <div class="chips" id="fSkips"></div>
+        <div class="row"><input type="date" id="fSkipAdd" aria-label="건너뛸 날짜 추가"></div>
+        <button class="ghost" id="skipNext">다음 한 번만 건너뛰기</button>
+      </div>
+    </div>
+
+    <label class="field"><span>메모</span><input type="text" id="fLabel" maxlength="30" placeholder="예) 1교시 선형대수"></label>
+    <button class="danger" id="delBtn">알람 삭제</button>
+  </div>
+</div>
+
+<!-- week -->
+<div class="sheet" id="weekSheet">
+  <div class="panel">
+    <div class="shead"><span class="txt"></span><b>앞으로 2주</b><button class="txt strong" data-close>닫기</button></div>
+    <div id="weekList"></div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="sheet" id="setSheet">
+  <div class="panel">
+    <div class="shead"><span class="txt"></span><b>설정</b><button class="txt strong" data-close>완료</button></div>
+
+    <section class="set">
+      <h3>1. 저장 공간 연결</h3>
+      <p>단축어가 오늘 알람을 읽어갈 수 있게, 알람 목록을 Firebase에 올려둬요. 무료 요금제로 충분하고 카드 등록은 필요 없어요.</p>
+      <ol>
+        <li><code>console.firebase.google.com</code>에서 프로젝트를 하나 만들어요. (기존 프로젝트를 써도 돼요)</li>
+        <li>왼쪽 메뉴 <b>빌드 → Realtime Database → 데이터베이스 만들기</b>. 위치는 <b>싱가포르</b>, <b>잠금 모드</b>로 시작해요.</li>
+        <li><b>규칙</b> 탭의 내용을 지우고 아래 규칙을 붙여넣은 뒤 <b>게시</b>를 눌러요.</li>
+      </ol>
+      <pre class="code" id="rulesCode"></pre>
+      <div class="copyrow" style="justify-content:flex-end"><button data-copy="rules">규칙 복사</button></div>
+      <ol start="4"><li><b>데이터</b> 탭 위쪽에 보이는 <code>https://…firebasedatabase.app</code> 주소를 복사해서 아래에 붙여넣어요.</li></ol>
+      <label class="field"><span>Realtime Database 주소</span>
+        <input type="url" id="sDb" placeholder="https://…firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <button class="primary" id="sTest">연결 확인</button>
+      <div class="msg" id="sTestMsg"></div>
+    </section>
+
+    <section class="set">
+      <h3>2. 단축어 만들기</h3>
+      <p>단축어 앱에서 <b>+</b>를 누르고 이름을 <b id="nameEcho">다시아침</b>으로 정해요. 아래 굵은 글씨를 동작 검색창에 치면 찾을 수 있어요. (이름이 조금 다르게 보이면 <b>알람</b>, <b>날짜</b>처럼 앞 단어로 검색해요)</p>
+      <span class="flabel">2번에 쓸 주소</span>
+      <div class="copyrow"><code id="urlBase">먼저 1번을 완료해주세요</code><button data-copy="url">복사</button></div>
+      <ol>
+        <li><b>날짜 포맷</b> — 날짜는 '현재 날짜', 날짜 형식은 '사용자 지정'으로 바꾸고 <code>yyyy-MM-dd</code> 입력, 시간 형식은 '없음'</li>
+        <li><b>URL</b> — 위 주소를 붙여넣고, 맨 끝에 변수 '포맷된 날짜'를 넣은 다음 <code>.json</code>을 이어서 입력</li>
+        <li><b>URL의 콘텐츠 가져오기</b></li>
+        <li><b>사전 값 가져오기</b> — 키에 <code>t</code></li>
+        <li><b>변수 설정</b> — 이름 <code>오늘</code></li>
+        <li><b>모든 알람 가져오기</b></li>
+        <li><b>각 항목을 반복</b> (모든 알람) — 반복 안에:
+          <ol type="a">
+            <li><b>만약</b> — '반복 항목'을 탭해서 속성 <b>이름</b>을 고르고, 조건 <b>다음으로 시작함</b>, 값 <code id="prefixEcho">다시아침 </code> (끝에 띄어쓰기 한 칸)</li>
+            <li>(만약 안) <b>변수에 추가</b> — 반복 항목의 이름을 변수 <code>기존</code>에 추가</li>
+            <li><b>텍스트 대치</b> — 찾기 <code>다시아침 </code>, 바꾸기는 비워둠, 대상은 반복 항목의 이름</li>
+            <li><b>입력에서 날짜 가져오기</b> — 대치된 텍스트</li>
+            <li><b>만약</b> — <code>오늘</code> / <b>다음을 포함함</b> / 대치된 텍스트
+              <ol type="i">
+                <li>그 안에 <b>만약</b> — 날짜 / <b>다음 이후임</b> / 현재 날짜 → <b>알람 켬/끔</b>: 반복 항목 <b>켬</b></li>
+                <li>그렇지 않으면 → <b>알람 켬/끔</b>: 반복 항목 <b>끔</b></li>
+              </ol>
+            </li>
+            <li>바깥 만약의 그렇지 않으면 → <b>알람 켬/끔</b>: 반복 항목 <b>끔</b></li>
+          </ol>
+        </li>
+        <li><b>텍스트 결합</b> — <code>기존</code>을 새로운 줄로 결합 → <b>변수 설정</b> 이름 <code>기존목록</code></li>
+        <li><b>텍스트 분할</b> — <code>오늘</code>을 사용자 지정 <code>,</code>로 분할</li>
+        <li><b>각 항목을 반복</b> (분할된 텍스트) — 반복 안에:
+          <ol type="a">
+            <li><b>만약</b> — 반복 항목 / 다음을 포함함 / <code>:</code></li>
+            <li><b>텍스트</b> — <code>다시아침 </code> 뒤에 변수 '반복 항목'</li>
+            <li><b>만약</b> — <code>기존목록</code> / <b>다음을 포함하지 않음</b> / 텍스트</li>
+            <li><b>입력에서 날짜 가져오기</b> — 반복 항목</li>
+            <li><b>만약</b> — 날짜 / 다음 이후임 / 현재 날짜 → <b>알람 생성</b>: 시간은 '날짜', 레이블은 '텍스트', 반복 안 함</li>
+          </ol>
+        </li>
+      </ol>
+      <p>다 만들었으면 단축어를 한 번 직접 실행해서 알람 접근을 <b>허용</b>해주세요.</p>
+    </section>
+
+    <section class="set">
+      <h3>3. 매일 자동으로 돌리기</h3>
+      <ol>
+        <li>단축어 앱 아래 <b>자동화 → +</b> → <b>특정 시간</b></li>
+        <li>시간 <b>오전 12:01</b>, 반복 <b>매일</b>, <b>즉시 실행</b> 선택 (실행 시 알림은 꺼도 돼요)</li>
+        <li>다음 → 방금 만든 단축어 선택</li>
+      </ol>
+      <p>시계 앱에 <code>다시아침 07:30</code> 같은 알람이 시간별로 하나씩 생기고, 매일 밤 그날 울릴 것만 켜져요. 소리는 시계 앱에서 한 번 바꿔두면 계속 유지돼요. 자정~오전 12:01 사이 알람은 지원하지 않아요.</p>
+    </section>
+
+    <section class="set">
+      <h3>기타</h3>
+      <label class="field"><span>단축어 이름</span><input type="text" id="sName" autocapitalize="off" autocorrect="off"></label>
+      <div class="field"><span>내 키 · 다시 설치하거나 다른 기기에서 불러올 때 필요해요</span>
+        <div class="copyrow"><code id="sKey"></code><button data-copy="key">복사</button></div></div>
+      <div class="field"><span>키로 불러오기</span>
+        <div class="row"><input type="text" id="sLoadKey" placeholder="키 붙여넣기" autocapitalize="off" autocorrect="off" spellcheck="false"><button id="sLoad">불러오기</button></div></div>
+      <button class="ghost" id="sApply">지금 아이폰 알람에 반영</button>
+    </section>
+  </div>
+</div>
+
+<div class="modal" id="confirm"><div class="m"><p id="cMsg"></p><div class="btns"><button id="cNo">취소</button><button class="yes" id="cYes">삭제</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const DOW = ['일','월','화','수','목','금','토'];
+const PREFIX = '다시아침 ';
+const HORIZON = 180;            // 며칠치 일정을 미리 올려둘지
+const STORE = 'dasi-achim-v1';
+
+/* ---------- 상태 ---------- */
+function genKey(){
+  const c = 'abcdefghijkmnpqrstuvwxyz23456789'; let r = '';
+  for (const b of crypto.getRandomValues(new Uint8Array(24))) r += c[b % c.length];
+  return r;
+}
+function load(){
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(STORE)); } catch(e){}
+  if (!s || !Array.isArray(s.alarms)) s = { alarms: [], db: '', key: '', shortcut: '다시아침', lastSync: 0, syncedDay: '' };
+  if (!s.key) s.key = genKey();
+  if (!s.shortcut) s.shortcut = '다시아침';
+  s.alarms = s.alarms.map(norm);
+  return s;
+}
+function norm(a){
+  return { id: a.id, time: a.time || '07:00', label: a.label || '', type: a.type === 'once' ? 'once' : 'repeat',
+    date: a.date || '', days: Array.isArray(a.days) ? a.days.map(Number) : (a.days ? Object.values(a.days).map(Number) : []),
+    resume: a.resume || '', skips: Array.isArray(a.skips) ? a.skips : (a.skips ? Object.values(a.skips) : []), on: a.on !== false };
+}
+let S = load();
+function persist(){ try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e){} }
+
+/* ---------- 날짜 도구 ---------- */
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const sod = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const addDays = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const at = (d,t) => { const [h,m] = t.split(':').map(Number); return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, m); };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const md = d => `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`;
+function relDay(d){
+  const diff = Math.round((sod(d) - sod(new Date())) / 864e5);
+  return diff === 0 ? '오늘' : diff === 1 ? '내일' : diff === 2 ? '모레' : md(d);
+}
+function until(dt){
+  let m = Math.round((dt - new Date()) / 6e4);
+  if (m < 1) return '곧 울려요';
+  const d = Math.floor(m/1440); m -= d*1440; const h = Math.floor(m/60); m -= h*60;
+  if (d) return `${d}일 ${h}시간 후`;
+  if (h) return m ? `${h}시간 ${m}분 후` : `${h}시간 후`;
+  return `${m}분 후`;
+}
+function daysText(days){
+  const s = [...days].sort().join('');
+  if (s === '0123456') return '매일';
+  if (s === '12345') return '평일';
+  if (s === '06') return '주말';
+  return [1,2,3,4,5,6,0].filter(x => days.includes(x)).map(x => DOW[x]).join(' ');
+}
+
+/* ---------- 알람 규칙 ---------- */
+function ringsOn(a, d, ignoreOn){
+  if (!ignoreOn && !a.on) return false;
+  const s = ymd(d);
+  if (a.type === 'once') return a.date === s;
+  if (!a.days.includes(d.getDay())) return false;
+  if (a.resume && s < a.resume) return false;
+  if (a.skips.includes(s)) return false;
+  return true;
+}
+function nextRing(a, ignoreOn){
+  const now = new Date(), nt = hm(now);
+  for (let i = 0; i < 400; i++){
+    const d = addDays(now, i);
+    if (ringsOn(a, d, ignoreOn)){
+      if (i === 0 && a.time <= nt) continue;
+      return at(d, a.time);
+    }
+  }
+  return null;
+}
+const timesOn = d => [...new Set(S.alarms.filter(a => ringsOn(a, d)).map(a => a.time))].sort();
+const todayRemaining = () => { const nt = hm(new Date()); return timesOn(new Date()).filter(t => t > nt).join(','); };
+
+/* ---------- 화면 ---------- */
+function render(){
+  const now = new Date();
+  $('#today').textContent = `${now.getMonth()+1}월 ${now.getDate()}일 ${DOW[now.getDay()]}요일`;
+
+  let best = null;
+  for (const a of S.alarms){ const n = nextRing(a); if (n && (!best || n < best.n)) best = { a, n }; }
+  $('#next').innerHTML = best
+    ? `<div class="k">다음 알람</div><div class="v">${relDay(best.n)}<b>${hm(best.n)}</b></div><div class="s">${until(best.n)}${best.a.label ? ' · ' + esc(best.a.label) : ''}</div>`
+    : `<div class="k">다음 알람</div><div class="v soft">예정된 알람이 없어요</div>`;
+
+  const today = ymd(now);
+  const items = S.alarms.map(a => ({ a, n: nextRing(a, true) }))
+    .sort((x,y) => (!x.n) !== (!y.n) ? (!x.n ? 1 : -1) : x.a.time.localeCompare(y.a.time));
+
+  $('#list').innerHTML = items.map(({a, n}) => {
+    const past = !n;
+    const sub = a.type === 'once' ? `${md(parseYmd(a.date))} 하루만` : daysText(a.days);
+    const tags = [];
+    if (a.type === 'repeat'){
+      if (a.resume && a.resume > today) tags.push(`쉬는 중 · ${md(parseYmd(a.resume))}부터 다시`);
+      const fs = a.skips.filter(s => s >= today).sort();
+      if (fs.length) tags.push(fs.length <= 2 ? fs.map(s => { const d = parseYmd(s); return `${d.getMonth()+1}/${d.getDate()}`; }).join(', ') + ' 건너뜀' : `${fs.length}일 건너뜀`);
+    }
+    const nx = past ? '지난 알람' : a.on ? `다음 · ${relDay(n)}${relDay(n).includes('월') ? '' : ' ' + (n.getMonth()+1) + '/' + n.getDate()}` : '꺼짐';
+    return `<article class="card ${a.on && !past ? '' : 'dim'}" data-id="${a.id}">
+      <div class="main">
+        <div class="time">${a.time}</div>
+        <div class="sub">${esc(sub)}</div>
+        ${tags.length ? `<div class="tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="meta">${a.label ? esc(a.label) + ' · ' : ''}${nx}</div>
+      </div>
+      <label class="sw"><input type="checkbox" data-tog="${a.id}" ${a.on ? 'checked' : ''} ${past ? 'disabled' : ''} aria-label="켜기/끄기"><span></span></label>
+    </article>`;
+  }).join('');
+  $('#empty').hidden = S.alarms.length > 0;
+  renderSync();
+}
+let syncState = 'idle';
+function renderSync(){
+  const el = $('#sync'); el.classList.remove('warn');
+  if (!S.db){ el.classList.add('warn'); el.innerHTML = '아직 아이폰 알람과 연결되지 않았어요 · <button data-open-set>설정하기</button>'; return; }
+  if (syncState === 'fail'){ el.classList.add('warn'); el.innerHTML = '저장 공간에 올리지 못했어요 · <button data-retry>다시 시도</button>'; return; }
+  if (syncState === 'busy'){ el.textContent = '저장하는 중…'; return; }
+  el.textContent = S.lastSync ? `저장됨 · ${relDay(new Date(S.lastSync))} ${hm(new Date(S.lastSync))}` : '';
+}
+
+/* ---------- 동기화 ---------- */
+const dbUrl = p => S.db.replace(/\/+$/,'') + '/' + p;
+async function sync(){
+  if (!S.db) { renderSync(); return false; }
+  syncState = 'busy'; renderSync();
+  const days = {}, base = sod(new Date());
+  for (let i = -1; i < HORIZON; i++){ const d = addDays(base, i); days[ymd(d)] = { t: timesOn(d).join(',') }; }
+  const body = { alarms: S.alarms, days, updated: Date.now() };
+  try {
+    const r = await fetch(dbUrl(`a/${S.key}.json`), { method: 'PUT', body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(r.status);
+    S.lastSync = Date.now(); S.syncedDay = ymd(new Date()); persist();
+    syncState = 'idle'; renderSync(); return true;
+  } catch(e){ syncState = 'fail'; renderSync(); return false; }
+}
+async function applyToPhone(){
+  if (!S.db){ openSet(); toast('먼저 저장 공간을 연결해주세요'); return; }
+  const ok = await sync();
+  if (!ok){ toast('저장에 실패했어요. 인터넷을 확인해주세요'); return; }
+  $('#banner').hidden = true;
+  location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(S.shortcut);
+}
+function afterChange(before){
+  persist(); render();
+  if (todayRemaining() !== before) $('#banner').hidden = false;
+  sync();
+}
+
+/* ---------- 시트 ---------- */
+function openSheet(sel){ $(sel).classList.add('open'); document.body.classList.add('lock'); }
+function closeSheets(){ $$('.sheet').forEach(s => s.classList.remove('open')); document.body.classList.remove('lock'); }
+$$('.sheet').forEach(s => s.addEventListener('click', e => { if (e.target === s || e.target.closest('[data-close]')) closeSheets(); }));
+
+function ask(msg, yes='삭제'){
+  return new Promise(res => {
+    $('#cMsg').textContent = msg; $('#cYes').textContent = yes; $('#confirm').classList.add('open');
+    const done = v => { $('#confirm').classList.remove('open'); $('#cYes').onclick = $('#cNo').onclick = null; res(v); };
+    $('#cYes').onclick = () => done(true); $('#cNo').onclick = () => done(false);
+  });
+}
+let tt;
+function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), 2200); }
+
+/* ---------- 편집 ---------- */
+let draft = null, editingId = null;
+function openEdit(id){
+  const a = S.alarms.find(x => x.id === id);
+  editingId = a ? id : null;
+  const tmr = ymd(addDays(new Date(), 1));
+  draft = a ? norm(JSON.parse(JSON.stringify(a)))
+            : { id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), time: '07:00', label: '', type: 'repeat', date: tmr, days: [1,2,3,4,5], resume: '', skips: [], on: true };
+  if (!draft.date) draft.date = tmr;
+  $('#editTitle').textContent = a ? '알람 수정' : '새 알람';
+  $('#delBtn').hidden = !a;
+  $('#fTime').value = draft.time;
+  $('#fLabel').value = draft.label;
+  $('#fDate').value = draft.date;
+  $('#fDate').min = ymd(new Date());
+  $('#fResume').value = draft.resume;
+  $('#fResume').min = ymd(new Date());
+  $('#fSkipAdd').min = ymd(new Date());
+  drawEdit();
+  $('#editSheet .panel').scrollTop = 0;
+  openSheet('#editSheet');
+}
+function drawEdit(){
+  $$('#fType button').forEach(b => b.classList.toggle('on', b.dataset.type === draft.type));
+  $('#onceBox').hidden = draft.type !== 'once';
+  $('#repBox').hidden = draft.type !== 'repeat';
+  $('#fDays').innerHTML = [1,2,3,4,5,6,0].map(d => `<button data-d="${d}" class="${draft.days.includes(d) ? 'on' : ''}">${DOW[d]}</button>`).join('');
+  const today = ymd(new Date());
+  draft.skips = draft.skips.filter(s => s >= today).sort();
+  $('#fSkips').innerHTML = draft.skips.length
+    ? draft.skips.map(s => `<span class="chip">${md(parseYmd(s))}<button data-rm="${s}" aria-label="삭제">×</button></span>`).join('')
+    : '<span class="hint" style="margin:0">아직 없어요</span>';
+  $('#resumeHint').textContent = draft.resume
+    ? `${md(parseYmd(draft.resume))}부터 다시 울려요. 그 전까지는 조용해요.`
+    : '비워두면 지금처럼 계속 반복해요.';
+}
+$('#fType').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; draft.type = b.dataset.type; drawEdit(); });
+$('#fDays').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; const d = +b.dataset.d;
+  draft.days = draft.days.includes(d) ? draft.days.filter(x => x !== d) : [...draft.days, d]; drawEdit();
+});
+$$('[data-preset]').forEach(b => b.addEventListener('click', () => {
+  draft.days = { all: [0,1,2,3,4,5,6], week: [1,2,3,4,5], end: [0,6] }[b.dataset.preset]; drawEdit();
+}));
+$$('[data-rest]').forEach(b => b.addEventListener('click', () => {
+  draft.resume = ymd(addDays(new Date(), +b.dataset.rest)); $('#fResume').value = draft.resume; drawEdit();
+}));
+$('#fResume').addEventListener('change', e => { draft.resume = e.target.value || ''; drawEdit(); });
+$('#clrResume').addEventListener('click', () => { draft.resume = ''; $('#fResume').value = ''; drawEdit(); });
+$('#fSkipAdd').addEventListener('change', e => {
+  const v = e.target.value; if (v && !draft.skips.includes(v)) draft.skips.push(v);
+  e.target.value = ''; drawEdit();
+});
+$('#fSkips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; draft.skips = draft.skips.filter(s => s !== b.dataset.rm); drawEdit(); });
+$('#skipNext').addEventListener('click', () => {
+  if (!draft.days.length) { toast('먼저 요일을 골라주세요'); return; }
+  draft.time = $('#fTime').value || draft.time;
+  const n = nextRing({ ...draft, on: true }, true);
+  if (!n) { toast('건너뛸 다음 알람이 없어요'); return; }
+  draft.skips.push(ymd(n)); drawEdit(); toast(`${md(n)}은 건너뛸게요`);
+});
+$('#saveBtn').addEventListener('click', () => {
+  draft.time = $('#fTime').value;
+  draft.label = $('#fLabel').value.trim();
+  draft.date = $('#fDate').value;
+  if (!/^\d{2}:\d{2}$/.test(draft.time)) { toast('시간을 정해주세요'); return; }
+  if (draft.type === 'once'){
+    if (!draft.date) { toast('날짜를 정해주세요'); return; }
+    if (at(parseYmd(draft.date), draft.time) <= new Date()) { toast('이미 지난 시간이에요'); return; }
+  } else if (!draft.days.length) { toast('요일을 하나 이상 골라주세요'); return; }
+  const before = todayRemaining();
+  draft.on = true;
+  const i = S.alarms.findIndex(a => a.id === draft.id);
+  if (i >= 0) S.alarms[i] = draft; else S.alarms.push(draft);
+  closeSheets(); afterChange(before);
+  const n = nextRing(draft);
+  toast(n ? `${relDay(n)} ${hm(n)}에 울려요` : '저장했어요');
+});
+$('#delBtn').addEventListener('click', async () => {
+  if (!editingId) return;
+  if (!(await ask('이 알람을 삭제할까요?'))) return;
+  const before = todayRemaining();
+  S.alarms = S.alarms.filter(a => a.id !== editingId);
+  closeSheets(); afterChange(before); toast('삭제했어요');
+});
+
+/* ---------- 목록 ---------- */
+$('#list').addEventListener('click', e => {
+  if (e.target.closest('.sw')) return;
+  const c = e.target.closest('.card'); if (c) openEdit(c.dataset.id);
+});
+$('#list').addEventListener('change', e => {
+  const id = e.target.dataset.tog; if (!id) return;
+  const before = todayRemaining();
+  const a = S.alarms.find(x => x.id === id); a.on = e.target.checked;
+  afterChange(before);
+});
+$('#fab').addEventListener('click', () => openEdit(null));
+$('#bannerBtn').addEventListener('click', applyToPhone);
+$('#sync').addEventListener('click', e => {
+  if (e.target.closest('[data-open-set]')) openSet();
+  if (e.target.closest('[data-retry]')) sync();
+});
+
+/* ---------- 미리보기 ---------- */
+$('#btnWeek').addEventListener('click', () => {
+  const base = new Date(), nt = hm(base);
+  let html = '';
+  for (let i = 0; i < 14; i++){
+    const d = addDays(base, i);
+    let ts = timesOn(d);
+    const label = i === 0 ? '오늘' : i === 1 ? '내일' : '';
+    html += `<div class="wrow"><div class="d">${md(d)}${label ? `<small>${label}</small>` : ''}</div><div class="t">${
+      ts.length ? ts.map(t => `<span style="${i === 0 && t <= nt ? 'opacity:.4' : ''}">${t}</span>`).join('') : '<em>조용한 날</em>'}</div></div>`;
+  }
+  $('#weekList').innerHTML = html;
+  openSheet('#weekSheet');
+});
+
+/* ---------- 설정 ---------- */
+const RULES = `{
+  "rules": {
+    "a": {
+      "$key": {
+        ".read": "$key.length >= 20",
+        ".write": "$key.length >= 20"
+      }
+    }
+  }
+}`;
+function fillSet(){
+  $('#rulesCode').textContent = RULES;
+  $('#sDb').value = S.db;
+  $('#sName').value = S.shortcut;
+  $('#nameEcho').textContent = S.shortcut;
+  $('#sKey').textContent = S.key;
+  $('#urlBase').textContent = S.db ? dbUrl(`a/${S.key}/days/`) : '먼저 1번을 완료해주세요';
+}
+function openSet(){ fillSet(); $('#sTestMsg').textContent = ''; $('#setSheet .panel').scrollTop = 0; openSheet('#setSheet'); }
+$('#btnSet').addEventListener('click', openSet);
+function cleanDb(v){
+  v = v.trim().replace(/\/+$/,'');
+  if (v && !/^https:\/\//.test(v)) v = 'https://' + v;
+  return v;
+}
+$('#sDb').addEventListener('change', e => { S.db = cleanDb(e.target.value); persist(); fillSet(); renderSync(); });
+$('#sName').addEventListener('change', e => { S.shortcut = e.target.value.trim() || '다시아침'; persist(); fillSet(); });
+$('#sTest').addEventListener('click', async () => {
+  S.db = cleanDb($('#sDb').value); persist(); fillSet();
+  const m = $('#sTestMsg');
+  if (!/^https:\/\/[^/]+\.(firebasedatabase\.app|firebaseio\.com)$/.test(S.db)) { m.className = 'msg bad'; m.textContent = '주소는 https://…firebasedatabase.app 형태여야 해요'; return; }
+  m.className = 'msg'; m.textContent = '확인하는 중…';
+  const ok = await sync();
+  if (ok){ m.className = 'msg ok'; m.textContent = '연결됐어요. 이제 2번 단축어를 만들어주세요.'; }
+  else { m.className = 'msg bad'; m.textContent = '연결하지 못했어요. 주소와 규칙(게시 눌렀는지)을 확인해주세요.'; }
+  render();
+});
+$('#sLoad').addEventListener('click', async () => {
+  const k = $('#sLoadKey').value.trim();
+  if (!S.db) { toast('먼저 저장 공간 주소를 넣어주세요'); return; }
+  if (k.length < 20) { toast('키가 너무 짧아요'); return; }
+  try {
+    const r = await fetch(dbUrl(`a/${k}/alarms.json`));
+    if (!r.ok) throw 0;
+    const data = await r.json();
+    const list = data ? (Array.isArray(data) ? data : Object.values(data)).filter(Boolean).map(norm) : [];
+    if (!list.length) { toast('이 키로 저장된 알람이 없어요'); return; }
+    if (S.alarms.length && !(await ask(`지금 알람 ${S.alarms.length}개를 불러온 ${list.length}개로 바꿀까요?`, '바꾸기'))) return;
+    const before = todayRemaining();
+    S.key = k; S.alarms = list; $('#sLoadKey').value = '';
+    fillSet(); afterChange(before); toast('불러왔어요');
+  } catch(e){ toast('불러오지 못했어요'); }
+});
+$('#sApply').addEventListener('click', applyToPhone);
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  const v = { rules: RULES, key: S.key, url: S.db ? dbUrl(`a/${S.key}/days/`) : '' }[b.dataset.copy];
+  if (!v) { toast('먼저 1번을 완료해주세요'); return; }
+  try { await navigator.clipboard.writeText(v); toast('복사했어요'); } catch(_) { toast('길게 눌러서 복사해주세요'); }
+});
+
+/* ---------- 확대 방지 · 갱신 ---------- */
+document.addEventListener('gesturestart', e => e.preventDefault());
+let lastTouch = 0;
+document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 300 && !e.target.closest('input')) e.preventDefault(); lastTouch = n; }, { passive: false });
+
+function refresh(){
+  render();
+  if (S.db && (S.syncedDay !== ymd(new Date()) || syncState === 'fail')) sync();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+setInterval(render, 30000);
+refresh();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
