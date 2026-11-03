@@ -1,4 +1,4 @@
-const CACHE = 'dasi-achim-v1';
+const CACHE = 'dasi-achim-v3';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

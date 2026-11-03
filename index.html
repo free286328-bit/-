@@ -147,7 +147,8 @@ header{display:flex;justify-content:space-between;align-items:center}
 .chip button{width:22px;height:22px;border-radius:50%;font-size:15px;line-height:1;color:var(--soft)}
 .box{padding:18px;border-radius:20px;background:var(--glass);border:1px solid var(--line);margin-bottom:18px}
 .box .flabel{margin-bottom:12px}
-.danger{display:block;width:100%;margin-top:10px;padding:14px;border-radius:14px;color:var(--danger);font-size:14.5px}
+.danger{display:block;width:100%;margin:0 0 18px;padding:12px;border-radius:14px;color:var(--danger);font-size:14px;border:1px solid var(--line);transition:.2s}
+.danger.armed{background:var(--danger);color:#fff;border-color:transparent;font-weight:700}
 .primary{display:block;width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:14.5px}
 .ghost{display:block;width:100%;padding:12px;border-radius:13px;border:1px solid var(--line);font-size:13.5px;color:var(--soft);margin-top:10px}
 
@@ -221,6 +222,7 @@ header{display:flex;justify-content:space-between;align-items:center}
   <div class="panel">
     <div class="shead"><button class="txt" data-close>취소</button><b id="editTitle">새 알람</b><button class="txt strong" id="saveBtn">저장</button></div>
     <input type="time" id="fTime" class="bigtime">
+    <button class="danger" id="delBtn">알람 삭제</button>
     <div class="seg" id="fType"><button data-type="once">특정 날짜</button><button data-type="repeat">반복</button></div>
 
     <div id="onceBox">
@@ -252,7 +254,6 @@ header{display:flex;justify-content:space-between;align-items:center}
     </div>
 
     <label class="field"><span>메모</span><input type="text" id="fLabel" maxlength="30" placeholder="예) 1교시 선형대수"></label>
-    <button class="danger" id="delBtn">알람 삭제</button>
   </div>
 </div>
 
@@ -509,8 +510,9 @@ async function applyToPhone(){
 }
 function afterChange(before){
   persist(); render();
-  if (todayRemaining() !== before) $('#banner').hidden = false;
-  sync();
+  // 오늘 울릴 알람이 바뀌었으면 저장 후 단축어를 바로 실행해서 시계 앱에 반영
+  if (todayRemaining() !== before && S.db){ $('#banner').hidden = false; setTimeout(applyToPhone, 450); }
+  else sync();
 }
 
 /* ---------- 시트 ---------- */
@@ -538,7 +540,7 @@ function openEdit(id){
             : { id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), time: '07:00', label: '', type: 'repeat', date: tmr, days: [1,2,3,4,5], resume: '', skips: [], on: true };
   if (!draft.date) draft.date = tmr;
   $('#editTitle').textContent = a ? '알람 수정' : '새 알람';
-  $('#delBtn').hidden = !a;
+  $('#delBtn').hidden = !a; resetDel();
   $('#fTime').value = draft.time;
   $('#fLabel').value = draft.label;
   $('#fDate').value = draft.date;
@@ -606,9 +608,15 @@ $('#saveBtn').addEventListener('click', () => {
   const n = nextRing(draft);
   toast(n ? `${relDay(n)} ${hm(n)}에 울려요` : '저장했어요');
 });
-$('#delBtn').addEventListener('click', async () => {
+let delArmed = false, delTimer;
+function resetDel(){ delArmed = false; clearTimeout(delTimer); const b = $('#delBtn'); b.textContent = '알람 삭제'; b.classList.remove('armed'); }
+$('#delBtn').addEventListener('click', () => {
   if (!editingId) return;
-  if (!(await ask('이 알람을 삭제할까요?'))) return;
+  if (!delArmed){
+    delArmed = true; const b = $('#delBtn'); b.textContent = '한 번 더 누르면 삭제돼요'; b.classList.add('armed');
+    delTimer = setTimeout(resetDel, 4000); return;
+  }
+  resetDel();
   const before = todayRemaining();
   S.alarms = S.alarms.filter(a => a.id !== editingId);
   closeSheets(); afterChange(before); toast('삭제했어요');
@@ -712,7 +720,7 @@ document.addEventListener('click', async e => {
 /* ---------- 확대 방지 · 갱신 ---------- */
 document.addEventListener('gesturestart', e => e.preventDefault());
 let lastTouch = 0;
-document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 300 && !e.target.closest('input')) e.preventDefault(); lastTouch = n; }, { passive: false });
+document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 300 && !e.target.closest('input,button,label,.card')) e.preventDefault(); lastTouch = n; }, { passive: false });
 
 function refresh(){
   render();
